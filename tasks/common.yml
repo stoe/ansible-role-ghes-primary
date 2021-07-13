@@ -1,0 +1,43 @@
+---
+- name: Wait for admin port ({{ github_admin_port }}) to come up
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/wait_for_module.html
+  wait_for:
+    host: "{{ github_host }}"
+    port: "{{ github_admin_port }}"
+    delay: 10
+    timeout: 300
+    state: started
+  changed_when: false
+
+- name: Wait for http status 200
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/uri_module.html
+  uri:
+    url: "https://{{ github_host }}:{{ github_admin_port }}"
+    validate_certs: no
+  register: http_result
+  #ignore_errors: true
+  until: http_result.status == 200
+  retries: 100
+  delay: 10
+  changed_when: false
+
+- name: Use template
+  block:
+
+  - name: Apply template
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/template_module.html
+    template:
+      src: settings.json.j2
+      dest: "{{ role_path }}/files/settings.json"
+
+  - name: Set settings path fact
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/set_fact_module.html
+    set_fact:
+      github_settings_path: "{{ role_path }}/files/settings.json"
+
+  when:
+    - github_use_settings_template|bool
+
+  # https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#ansible-no-log
+  # we do not log to not expose sensitive data
+  no_log: true

@@ -1,0 +1,24 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html
+- include_tasks: common.yml
+
+- name: Upload a license for the first time
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  # https://developer.github.com/enterprise/v3/enterprise-admin/management_console/#upload-a-license-for-the-first-time
+  shell: |
+    curl -L -k -X POST \
+      "https://{{ github_host }}:{{ github_admin_port }}/setup/api/start" \
+      -F "license=@{{ github_license_path }}" \
+      -F "password={{ github_admin_password }}" \
+      -F "settings=<{{ github_settings_path }}"
+  register: license_result
+  # https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#ansible-no-log
+  # we do not log to not expose the admin password
+  no_log: true
+
+- name: Upload license result
+  debug: msg="{{ (license_result.stdout | from_json).message }}"
+  when:
+    - license_result.stdout is defined
+    - license_result.stdout != ""
+    - (license_result.stdout | from_json).message

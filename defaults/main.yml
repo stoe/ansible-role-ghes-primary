@@ -1,0 +1,12 @@
+---
+github_host: 0.0.0.0
+# Set GitHub Enterprise Server hostname to the host if not supplied
+github_hostname: "{{ github_host }}"
+
+github_admin_port: 8443
+github_admin_password: PassW0rd!
+
+github_license_path: "{{ role_path }}/files/license.example.ghl"
+github_settings_path: "{{ role_path }}/files/settings.example.json"
+
+github_use_settings_template: false

@@ -1,0 +1,10 @@
+---
+- name: Remove temporary license and settings files
+  # http://docs.ansible.com/ansible/file_module.html
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/tmp/license.ghl"
+    - "/tmp/settings.json"
+  become: true

@@ -1,0 +1,14 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html
+- include_tasks: common.yml
+
+- name: Modify settings
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  # https://developer.github.com/enterprise/v3/enterprise-admin/management_console/#modify-settings
+  shell: |
+    curl -L -k -X PUT \
+      "https://api_key:{{ github_admin_password }}@{{ github_host }}:{{ github_admin_port }}/setup/api/settings" \
+      --data-urlencode "settings=`cat {{ github_settings_path }}`"
+  # https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#ansible-no-log
+  # we do not log to not expose the admin password
+  no_log: true
